@@ -193,72 +193,52 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchQuotesFromServer?.(); // optional if using
 });
 
-// ---------------------------------------
+// ----------------------------------------------
 
-// Fetch from simulated server every 30 seconds
+// Fetch simulated server data
 
-setInterval(fetchFromServer, 30000);
+async function fetchFromServer() {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+    const serverData = await response.json();
 
-function fetchFromServer() {
-  fetch("https://mocki.io/v1/01d7e60f-ac94-495c-aac7-dcf92439421b") // Replace with real mock URL
-    .then((response) => response.json())
-    .then((serverQuotes) => {
-      console.log("Server quotes:", serverQuotes);
-      syncWithLocalData(serverQuotes);
-    })
-    .catch((error) => {
-      console.error("Error syncing with server:", error);
+    console.log("Fetched from server:", serverData);
+
+    // Optional: Simulate server quotes from the first 5 items
+    const serverQuotes = serverData.slice(0, 5).map((post) => ({
+      text: post.title,
+      category: "Server",
+    }));
+
+    syncWithLocalData(serverQuotes);
+    notifyUserOfSync();
+  } catch (error) {
+    console.error("Failed to fetch:", error);
+  }
+}
+
+// Send data (simulate pushing new quote to server)
+async function postToServer(newQuote) {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
+      method: "POST",
+      body: JSON.stringify(newQuote),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
     });
+
+    const result = await response.json();
+    console.log("Posted to server:", result);
+  } catch (error) {
+    console.error("Failed to post:", error);
+  }
 }
+const newQuote = { text: newQuoteText, category: newCategory };
+quotes.push(newQuote);
+saveQuotes();
+postToServer(newQuote); // Simulate sync
 
-// Sync with Local Data
-
-function syncWithLocalData(serverQuotes) {
-  const localQuotes = JSON.parse(localStorage.getItem("quotes")) || [];
-
-  const mergedQuotes = [];
-
-  serverQuotes.forEach((serverQuote) => {
-    const match = localQuotes.find(
-      (localQuote) => localQuote.text === serverQuote.text
-    );
-
-    if (match) {
-      // Replace local with server (server takes precedence)
-      mergedQuotes.push(serverQuote);
-    } else {
-      mergedQuotes.push(serverQuote);
-    }
-  });
-
-  // Add any local-only quotes
-  localQuotes.forEach((localQuote) => {
-    const exists = mergedQuotes.some((q) => q.text === localQuote.text);
-    if (!exists) mergedQuotes.push(localQuote);
-  });
-
-  quotes = mergedQuotes;
-  localStorage.setItem("quotes", JSON.stringify(mergedQuotes));
-  renderQuotes(); // Re-render UI
-}
-
-// Handle Conflicts with UI
-function notifyUserOfSync() {
-  const syncBanner = document.createElement("div");
-  syncBanner.textContent = "Quotes updated from server.";
-  syncBanner.style.background = "#ffcc00";
-  syncBanner.style.color = "#222";
-  syncBanner.style.padding = "10px";
-  syncBanner.style.position = "fixed";
-  syncBanner.style.top = "0";
-  syncBanner.style.width = "100%";
-  syncBanner.style.textAlign = "center";
-  syncBanner.style.zIndex = "1000";
-
-  document.body.appendChild(syncBanner);
-
-  setTimeout(() => {
-    syncBanner.remove();
-  }, 5000);
-}
-notifyUserOfSync();
+// Add Periodic Sync (every 30s or on page load)
+setInterval(fetchFromServer, 30000);
+document.addEventListener("DOMContentLoaded", fetchFromServer);
