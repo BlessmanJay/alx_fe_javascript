@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Fetch simulated server data
 
-async function fetchFromServer() {
+async function syncQuotes() {
   try {
     const response = await fetch("https://jsonplaceholder.typicode.com/posts");
     const serverData = await response.json();
