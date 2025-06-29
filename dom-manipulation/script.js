@@ -234,6 +234,22 @@ async function postToServer(newQuote) {
     console.error("Failed to post:", error);
   }
 }
+
+// Sync Logic
+function syncWithLocalData(serverQuotes) {
+  const existing = [...quotes];
+
+  serverQuotes.forEach((serverQuote) => {
+    const exists = existing.some((q) => q.text === serverQuote.text);
+    if (!exists) existing.push(serverQuote);
+  });
+
+  quotes = existing;
+  saveQuotes();
+  populateCategories();
+  renderFilteredQuotes();
+}
+
 const newQuote = { text: newQuoteText, category: newCategory };
 quotes.push(newQuote);
 saveQuotes();
