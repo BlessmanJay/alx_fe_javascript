@@ -128,3 +128,67 @@ function importFromJsonFile(event) {
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
+
+// Task #3
+
+// Populate Categories Dynamically
+
+function populateCategories() {
+  const categoryFilter = document.getElementById("categoryFilter");
+
+  // Clear existing options except 'All'
+  categoryFilter.innerHTML = `<option value="all">All Categories</option>`;
+
+  const categories = [...new Set(quotes.map((q) => q.category))];
+
+  categories.forEach((category) => {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = category;
+    categoryFilter.appendChild(option);
+  });
+
+  // Set previous selected filter if available
+  const savedCategory = localStorage.getItem("selectedCategory");
+  if (savedCategory) {
+    categoryFilter.value = savedCategory;
+    filterQuotes(); // Auto-apply filter on load
+  }
+}
+
+// Filter Quotes Based on Selected Category
+
+function filterQuotes() {
+  const selectedCategory = document.getElementById("categoryFilter").value;
+  localStorage.setItem("selectedCategory", selectedCategory); // Save selection
+
+  let filteredQuotes;
+
+  if (selectedCategory === "all") {
+    filteredQuotes = quotes;
+  } else {
+    filteredQuotes = quotes.filter((q) => q.category === selectedCategory);
+  }
+
+  renderFilteredQuotes(filteredQuotes);
+}
+
+// Remember the Last Selected Filter
+
+function renderFilteredQuotes(filteredQuotes) {
+  const quoteDisplay = document.getElementById("quoteDisplay");
+  quoteDisplay.innerHTML = ""; // Clear old quotes
+
+  filteredQuotes.forEach((quote) => {
+    const p = document.createElement("p");
+    p.textContent = `"${quote.text}" - [${quote.category}]`;
+    quoteDisplay.appendChild(p);
+  });
+}
+
+// Call populateCategories() and apply filter automatically on load:
+
+document.addEventListener("DOMContentLoaded", () => {
+  populateCategories();
+  fetchQuotesFromServer?.(); // optional if using
+});
