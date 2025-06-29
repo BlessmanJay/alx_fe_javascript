@@ -48,7 +48,17 @@ function createAddQuoteForm() {
   const newCategory = categoryInput.value.trim();
 
   if (newQuote && newCategory) {
-    quotes.push({ text: newQuote, category: newCategory });
+    const newQuoteObj = { text: newQuote, category: newCategory };
+    quotes.push(newQuoteObj);
+
+    // Create New DOM Element
+    const quoteDisplay = document.getElementById("quoteDisplay");
+    const newQuoteElement = document.createElement("p");
+    newQuoteElement.innerHTML = `"${randomQuote.text}" - [${randomQuote.category}]`;
+
+    // Append to DOM
+    quoteDisplay.appendChild(newQuoteElement);
+
     alert("Quote added successfully!");
     quoteInput.value = "";
     categoryInput.value = "";
