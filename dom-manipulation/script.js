@@ -192,3 +192,73 @@ document.addEventListener("DOMContentLoaded", () => {
   populateCategories();
   fetchQuotesFromServer?.(); // optional if using
 });
+
+// ---------------------------------------
+
+// Fetch from simulated server every 30 seconds
+
+setInterval(fetchFromServer, 30000);
+
+function fetchFromServer() {
+  fetch("https://mocki.io/v1/01d7e60f-ac94-495c-aac7-dcf92439421b") // Replace with real mock URL
+    .then((response) => response.json())
+    .then((serverQuotes) => {
+      console.log("Server quotes:", serverQuotes);
+      syncWithLocalData(serverQuotes);
+    })
+    .catch((error) => {
+      console.error("Error syncing with server:", error);
+    });
+}
+
+// Sync with Local Data
+
+function syncWithLocalData(serverQuotes) {
+  const localQuotes = JSON.parse(localStorage.getItem("quotes")) || [];
+
+  const mergedQuotes = [];
+
+  serverQuotes.forEach((serverQuote) => {
+    const match = localQuotes.find(
+      (localQuote) => localQuote.text === serverQuote.text
+    );
+
+    if (match) {
+      // Replace local with server (server takes precedence)
+      mergedQuotes.push(serverQuote);
+    } else {
+      mergedQuotes.push(serverQuote);
+    }
+  });
+
+  // Add any local-only quotes
+  localQuotes.forEach((localQuote) => {
+    const exists = mergedQuotes.some((q) => q.text === localQuote.text);
+    if (!exists) mergedQuotes.push(localQuote);
+  });
+
+  quotes = mergedQuotes;
+  localStorage.setItem("quotes", JSON.stringify(mergedQuotes));
+  renderQuotes(); // Re-render UI
+}
+
+// Handle Conflicts with UI
+function notifyUserOfSync() {
+  const syncBanner = document.createElement("div");
+  syncBanner.textContent = "Quotes updated from server.";
+  syncBanner.style.background = "#ffcc00";
+  syncBanner.style.color = "#222";
+  syncBanner.style.padding = "10px";
+  syncBanner.style.position = "fixed";
+  syncBanner.style.top = "0";
+  syncBanner.style.width = "100%";
+  syncBanner.style.textAlign = "center";
+  syncBanner.style.zIndex = "1000";
+
+  document.body.appendChild(syncBanner);
+
+  setTimeout(() => {
+    syncBanner.remove();
+  }, 5000);
+}
+notifyUserOfSync();
