@@ -82,3 +82,49 @@ function createAddQuoteForm() {
 
 // Event Listener for the "Show New Quote" button
 document.getElementById("newQuote").addEventListener("click", showRandomQuote);
+
+// New Code
+// ✅ Export quotes to JSON file
+function exportToJson() {
+  const dataStr = JSON.stringify(quotes, null, 2); // Pretty format
+  const blob = new Blob([dataStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const downloadLink = document.createElement("a");
+  downloadLink.href = url;
+  downloadLink.download = "quotes.json";
+  downloadLink.click();
+
+  URL.revokeObjectURL(url);
+}
+
+// ✅ Import quotes from JSON file
+function importFromJsonFile(event) {
+  const fileReader = new FileReader();
+
+  fileReader.onload = function (e) {
+    try {
+      const importedQuotes = JSON.parse(e.target.result);
+
+      // Optional: Validate format before adding
+      const validQuotes = importedQuotes.filter((q) => q.text && q.category);
+
+      if (validQuotes.length > 0) {
+        quotes.push(...validQuotes);
+        saveQuotes();
+        alert("Quotes imported successfully!");
+      } else {
+        alert("No valid quotes found in the file.");
+      }
+    } catch (error) {
+      alert("Invalid JSON file.");
+    }
+  };
+
+  fileReader.readAsText(event.target.files[0]);
+}
+
+// ✅ Helper to save quotes to localStorage
+function saveQuotes() {
+  localStorage.setItem("quotes", JSON.stringify(quotes));
+}
