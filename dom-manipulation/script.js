@@ -31,10 +31,10 @@ const quotes = [
   },
 ];
 // Function to display a Random Quote
-function displayRandomQuote() {
+function showRandomQuote() {
   const randomIndex = Math.floor(Math.random() * quotes.length);
   const randomQuote = quotes[randomIndex];
-
+  textContent = innrHTML;
   const quoteDisplay = document.getElementById("quoteDisplay");
   quoteDisplay.textContent = `"${randomQuote.text}" - [${randomQuote.category}]`;
 }
@@ -56,6 +56,4 @@ function addQuote() {
 }
 
 // Event Listener for the "Show New Quote" button
-document
-  .getElementById("newQuote")
-  .addEventListener("click", displayRandomQuote);
+document.getElementById("newQuote").addEventListener("click", showRandomQuote);
